@@ -142,6 +142,45 @@ class holder implements Serializable {
     Singleroom deluxe_singleerrom[] = new Singleroom[20]; // Deluxe
 }
 
+// Adapter interface
+interface RoomAdapter {
+    void specialService();
+}
+
+// Adapter implementation
+class SingleRoomAdapter implements RoomAdapter {
+    private Singleroom room;
+
+    SingleRoomAdapter(Singleroom room) {
+        this.room = room;
+    }
+
+    @Override
+    public void specialService() {
+        System.out.println("Providing special service for single room: " + room.name);
+    }
+}
+
+// Decorator interface
+interface RoomDecorator {
+    void display();
+}
+
+// Decorator implementation
+class RoomDecoratorImpl implements RoomDecorator {
+    private RoomDecorator decoratedRoom;
+
+    RoomDecoratorImpl(RoomDecorator decoratedRoom) {
+        this.decoratedRoom = decoratedRoom;
+    }
+
+    @Override
+    public void display() {
+        decoratedRoom.display();
+        System.out.println("Additional features added by decorator.");
+    }
+}
+
 class Hotel {
     static RoomFactory roomFactory = new HotelRoomFactory();
     static holder hotel_ob = new holder();
@@ -186,6 +225,8 @@ class Hotel {
                 break;
         }
     }
+
+
 
     static void bookroom(int i) {
         int j;
