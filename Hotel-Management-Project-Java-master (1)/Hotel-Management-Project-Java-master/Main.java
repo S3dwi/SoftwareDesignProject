@@ -5,7 +5,18 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+
+// Observer design pattern
+interface RoomObserver {
+    void updateRoomAvailability(int roomNumber, boolean available);
+}
+
+// Strategy design pattern
+interface BillingStrategy {
+    double calculateRoomCharge(int roomType);
+}
 
 class Food implements Serializable {
     int itemno;
@@ -30,13 +41,6 @@ class Food implements Serializable {
                 break;
         }
     }
-}
-
-interface RoomFactory {
-    Singleroom createSingleRoom(String name, String contact, String gender);
-
-    Doubleroom createDoubleRoom(String name, String contact, String gender, String name2, String contact2,
-            String gender2);
 }
 
 class HotelRoomFactory implements RoomFactory {
@@ -131,7 +135,7 @@ class Doubleroom extends Singleroom implements Serializable {
 class NotAvailable extends Exception {
     @Override
     public String toString() {
-        return "Not Available !";
+        return "Not Available!";
     }
 }
 
@@ -181,6 +185,65 @@ class RoomDecoratorImpl implements RoomDecorator {
     }
 }
 
+class RoomAvailability {
+    private List<RoomObserver> observers;
+
+    public RoomAvailability() {
+        observers = new ArrayList<>();
+    }
+
+    public void addObserver(RoomObserver observer) {
+        observers.add(observer);
+    }
+
+    public void removeObserver(RoomObserver observer) {
+        observers.remove(observer);
+    }
+
+    public void notifyObservers(int roomNumber, boolean available) {
+        for (RoomObserver observer : observers) {
+            observer.updateRoomAvailability(roomNumber, available);
+        }
+    }
+
+    public void updateRoomStatus(int roomNumber, boolean available) {
+        // Update room status
+        // Notify observers
+        notifyObservers(roomNumber, available);
+    }
+}
+
+class Customer implements RoomObserver {
+    private String name;
+
+    public Customer(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public void updateRoomAvailability(int roomNumber, boolean available) {
+        if (available) {
+            System.out.println("Dear " + name + ", Room " + roomNumber + " is now available!");
+        } else {
+            System.out.println("Dear " + name + ", Room " + roomNumber + " is no longer available.");
+        }
+    }
+}
+
+class LuxuryBillingStrategy implements BillingStrategy {
+    @Override
+    public double calculateRoomCharge(int roomType) {
+        return 4000; // Example charge for luxury room
+    }
+}
+
+class DeluxeBillingStrategy implements BillingStrategy {
+    @Override
+    public double calculateRoomCharge(int roomType) {
+        return 3000; // Example charge for deluxe room
+    }
+}
+
 class Hotel {
     static RoomFactory roomFactory = new HotelRoomFactory();
     static holder hotel_ob = new holder();
@@ -225,8 +288,6 @@ class Hotel {
                 break;
         }
     }
-
-
 
     static void bookroom(int i) {
         int j;
@@ -448,7 +509,7 @@ class Hotel {
                 if (w == 'y' || w == 'Y') {
                     bill(rn, rtype);
                     hotel_ob.luxury_doublerrom[rn] = null;
-                    System.out.println("Deallocated succesfully");
+                    System.out.println("Deallocated successfully");
                 }
                 break;
             case 2:
@@ -463,7 +524,7 @@ class Hotel {
                 if (w == 'y' || w == 'Y') {
                     bill(rn, rtype);
                     hotel_ob.deluxe_doublerrom[rn] = null;
-                    System.out.println("Deallocated succesfully");
+                    System.out.println("Deallocated successfully");
                 }
                 break;
             case 3:
@@ -473,12 +534,12 @@ class Hotel {
                     System.out.println("Empty Already");
                     return;
                 }
-                System.out.println(" Do you want to checkout ? (y/n)");
+                System.out.println("Do you want to checkout ?(y/n)");
                 w = sc.next().charAt(0);
                 if (w == 'y' || w == 'Y') {
                     bill(rn, rtype);
                     hotel_ob.luxury_singleerrom[rn] = null;
-                    System.out.println("Deallocated succesfully");
+                    System.out.println("Deallocated successfully");
                 }
                 break;
             case 4:
@@ -488,53 +549,100 @@ class Hotel {
                     System.out.println("Empty Already");
                     return;
                 }
-                System.out.println(" Do you want to checkout ? (y/n)");
+                System.out.println("Do you want to checkout ?(y/n)");
                 w = sc.next().charAt(0);
                 if (w == 'y' || w == 'Y') {
                     bill(rn, rtype);
                     hotel_ob.deluxe_singleerrom[rn] = null;
-                    System.out.println("Deallocated succesfully");
+                    System.out.println("Deallocated successfully");
                 }
                 break;
             default:
-                System.out.println("\nEnter valid option : ");
+                System.out.println("Not valid");
                 break;
         }
     }
 
-    static void order(int rn, int rtype) {
-        int i, q;
-        char wish;
-        try {
-            System.out.println(
-                    "\n==========\n   Menu:  \n==========\n\n1.Sandwich\tRs.50\n2.Pasta\t\tRs.60\n3.Noodles\tRs.70\n4.Coke\t\tRs.30\n");
-            do {
-                i = sc.nextInt();
-                System.out.print("Quantity- ");
-                q = sc.nextInt();
+    public static void main(String[] args) {
+        int i, j;
+        int rtype;
+        String cont;
 
-                switch (rtype) {
-                    case 1:
-                        hotel_ob.luxury_doublerrom[rn].food.add(new Food(i, q));
-                        break;
-                    case 2:
-                        hotel_ob.deluxe_doublerrom[rn].food.add(new Food(i, q));
-                        break;
-                    case 3:
-                        hotel_ob.luxury_singleerrom[rn].food.add(new Food(i, q));
-                        break;
-                    case 4:
-                        hotel_ob.deluxe_singleerrom[rn].food.add(new Food(i, q));
-                        break;
-                }
-                System.out.println("Do you want to order anything else ? (y/n)");
-                wish = sc.next().charAt(0);
-            } while (wish == 'y' || wish == 'Y');
-        } catch (NullPointerException e) {
-            System.out.println("\nRoom not booked");
-        } catch (Exception e) {
-            System.out.println("Cannot be done");
-        }
+        do {
+            System.out.println("\nMenu : ");
+            System.out.println("1. Luxury Double Room Booking");
+            System.out.println("2. Deluxe Double Room Booking");
+            System.out.println("3. Luxury Single Room Booking");
+            System.out.println("4. Deluxe Single Room Booking");
+            System.out.println("5. Room Details");
+            System.out.println("6. Availability");
+            System.out.println("7. Checkout");
+            System.out.println("8. Exit");
+            System.out.print("Enter choice: ");
+            i = sc.nextInt();
+            if (i == 1 || i == 2 || i == 3 || i == 4) {
+                System.out.print("\nEnter Room Type: ");
+                rtype = sc.nextInt();
+                bookroom(rtype);
+            }
+            switch (i) {
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                    System.out.print("\nDo you want to continue (yes/no) ? ");
+                    cont = sc.next();
+                    break;
+                case 5:
+                    System.out.println("\nRoom types : ");
+                    System.out.println("1. Luxury Double Room");
+                    System.out.println("2. Deluxe Double Room");
+                    System.out.println("3. Luxury Single Room");
+                    System.out.println("4. Deluxe Single Room");
+                    System.out.print("\nEnter room type : ");
+                    rtype = sc.nextInt();
+                    features(rtype);
+                    cont = "yes";
+                    break;
+                case 6:
+                    System.out.println("\nRoom types : ");
+                    System.out.println("1. Luxury Double Room");
+                    System.out.println("2. Deluxe Double Room");
+                    System.out.println("3. Luxury Single Room");
+                    System.out.println("4. Deluxe Single Room");
+                    System.out.print("\nEnter room type : ");
+                    rtype = sc.nextInt();
+                    availability(rtype);
+                    cont = "yes";
+                    break;
+                case 7:
+                    System.out.println("\nRoom types : ");
+                    System.out.println("1. Luxury Double Room");
+                    System.out.println("2. Deluxe Double Room");
+                    System.out.println("3. Luxury Single Room");
+                    System.out.println("4. Deluxe Single Room");
+                    System.out.print("\nEnter room type : ");
+                    rtype = sc.nextInt();
+                    System.out.print("\nEnter room number : ");
+                    j = sc.nextInt();
+                    j--;
+                    deallocate(j, rtype);
+                    cont = "yes";
+                    break;
+                case 8:
+                    cont = "no";
+                    break;
+                default:
+                    System.out.println("Wrong option");
+                    cont = "yes";
+                    break;
+            }
+        } while (cont.equals("yes"));
+    }
+
+    public static void order(int i, int j) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'order'");
     }
 }
 
