@@ -8,10 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-// Observer design pattern
-interface RoomObserver {
-    void updateRoomAvailability(int roomNumber, boolean available);
-}
 
 // Strategy design pattern
 interface BillingStrategy {
@@ -230,19 +226,37 @@ class Customer implements RoomObserver {
     }
 }
 
+interface BillingStrategy {
+    double calculateRoomCharge(RoomType roomType);
+}
+
+
 class LuxuryBillingStrategy implements BillingStrategy {
+    private static final double LUXURY_RATE = 4000;
+
     @Override
-    public double calculateRoomCharge(int roomType) {
-        return 4000; // Example charge for luxury room
+    public double calculateRoomCharge(RoomType roomType) {
+        if (roomType == RoomType.LUXURY) {
+            return LUXURY_RATE;
+        } else {
+            throw new IllegalArgumentException("Unsupported room type for Luxury billing strategy");
+        }
     }
 }
 
 class DeluxeBillingStrategy implements BillingStrategy {
+    private static final double DELUXE_RATE = 3000;
+
     @Override
-    public double calculateRoomCharge(int roomType) {
-        return 3000; // Example charge for deluxe room
+    public double calculateRoomCharge(RoomType roomType) {
+        if (roomType == RoomType.DELUXE) {
+            return DELUXE_RATE;
+        } else {
+            throw new IllegalArgumentException("Unsupported room type for Deluxe billing strategy");
+        }
     }
 }
+
 
 class Hotel {
     static RoomFactory roomFactory = new HotelRoomFactory();
