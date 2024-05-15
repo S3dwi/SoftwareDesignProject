@@ -147,7 +147,14 @@ interface RoomAdapter {
     void specialService();
 }
 
+// Adapter interface
+interface RoomAdapter {
+    void provideSpecialService();
+}
+
+
 // Adapter implementation
+// Adapter implementation for Single Room
 class SingleRoomAdapter implements RoomAdapter {
     private Singleroom room;
 
@@ -156,14 +163,43 @@ class SingleRoomAdapter implements RoomAdapter {
     }
 
     @Override
-    public void specialService() {
+    public void provideSpecialService() {
         System.out.println("Providing special service for single room: " + room.name);
+        // Example logic for providing special service to a single room
+        System.out.println("Special service details:");
+        System.out.println("- Complimentary breakfast");
+        System.out.println("- Free Wi-Fi access");
+        // Additional logic can be added based on specific requirements
     }
 }
 
-// Decorator interface
+
+// Adapter implementation for Double Room
+class DoubleRoomAdapter implements RoomAdapter {
+    private Doubleroom room;
+
+    DoubleRoomAdapter(Doubleroom room) {
+        this.room = room;
+    }
+
+    @Override
+    public void provideSpecialService() {
+        System.out.println("Providing special service for double room: " + room.name);
+        // Example logic for providing special service to a double room
+        System.out.println("Special service details:");
+        System.out.println("- Complimentary room service");
+        System.out.println("- Access to spa facilities");
+        // Additional logic can be added based on specific requirements
+    }
+}
+
+// Decorator interface with extended functionalities
 interface RoomDecorator {
     void display();
+    void addSpecialService(String serviceType);
+    void upgradeRoom(String upgradeType);
+    void addComplimentaryItems(int quantity);
+    
 }
 
 // Decorator implementation
@@ -179,8 +215,25 @@ class RoomDecoratorImpl implements RoomDecorator {
         decoratedRoom.display();
         System.out.println("Additional features added by decorator.");
     }
-}
 
+    @Override
+    public void addSpecialService(String serviceType) {
+        System.out.println("Adding special service: " + serviceType);
+        
+    }
+
+    @Override
+    public void upgradeRoom(String upgradeType) {
+        System.out.println("Upgrading room to: " + upgradeType);
+        
+    }
+
+    @Override
+    public void addComplimentaryItems(int quantity) {
+        System.out.println("Adding complimentary items: " + quantity);
+        
+    }
+}
 class RoomAvailability {
     private List<RoomObserver> observers;
 
